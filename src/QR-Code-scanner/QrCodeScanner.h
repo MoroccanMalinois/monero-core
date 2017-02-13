@@ -43,6 +43,7 @@ class QrCodeScanner : public QObject
     Q_OBJECT
 
     Q_PROPERTY(bool enabled READ enabled WRITE setEnabled NOTIFY enabledChanged)
+    Q_PROPERTY(bool multi READ multi WRITE setMulti NOTIFY multiChanged)
 
 public:
     QrCodeScanner(QObject *parent = Q_NULLPTR);
@@ -52,16 +53,23 @@ public:
     bool enabled() const;
     void setEnabled(bool enabled);
 
+    bool multi() const;
+    void setMulti(bool);
+
 public Q_SLOTS:
     void processCode(int type, const QString &data);
+    void processMultiCode(int type, const QString &data);
     void processFrame(QVideoFrame);
 
 Q_SIGNALS:
     void enabledChanged();
+    void multiChanged();
 
     void decoded(const QString &address, const QString &payment_id, const QString &amount, const QString &tx_description, const QString &recipient_name);
     void decode(int type, const QString &data);
     void notifyError(const QString &error, bool warning = false);
+    void multiDecoded(const QString &data);
+    void requestNext(int current, int total);
 
 protected:
 #ifdef WITH_SCANNER
@@ -70,7 +78,11 @@ protected:
 #endif
     int m_processTimerId;
     int m_processInterval;
-    int m_enabled;
+    bool m_enabled;
+    bool m_multi;
+    int m_current_message_id, m_total_messages;
+    QString m_message;
+    void reset();
     QVideoFrame m_curFrame;
     QVideoProbe *m_probe;
 };

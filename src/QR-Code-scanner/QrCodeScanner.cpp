@@ -36,6 +36,9 @@ QrCodeScanner::QrCodeScanner(QObject *parent)
     , m_processTimerId(-1)
     , m_processInterval(750)
     , m_enabled(true)
+    , m_multi(false)
+    , m_current_message_id(0)
+    , m_total_messages(0)
 {
 #ifdef WITH_SCANNER
     m_probe = new QVideoProbe(this);
@@ -54,6 +57,8 @@ void QrCodeScanner::processCode(int type, const QString &data)
 {
     if (! m_enabled) return;
     qDebug() << "decoded - type: " << type << " data: " << data;
+    if(m_multi)
+        return processMultiCode();
     QString address, payment_id, tx_description, recipient_name, error;
     QVector<QString> unknown_parameters;
     uint64_t amount(0);
@@ -72,6 +77,39 @@ void QrCodeScanner::processCode(int type, const QString &data)
     QString s_amount = WalletManager::instance()->displayAmount(amount);
     qDebug() << "Amount passed " << s_amount ;
     emit decoded(address, payment_id, s_amount, tx_description, recipient_name);
+}
+void QrCodeScanner::processMultiCode(int type, const QString &data)
+{
+    QTextStream in(data);
+    QString prefix;
+    in >> prefix;
+    if(prefix != "QR")
+    {
+        qDebug() << "Invalid multi code : " << prefix;
+        emit notifyError(error);
+        return reset();
+    }
+    QString message;
+    int current_message_id(0), total_messages(0);
+    in >> dec >> current_message_id >> total_messages;
+    qDebug() << "ids " << current_message_id << " " << total_messages;
+    in >> message;
+    qDebug() << "Mesage : " << message;
+    //TODO(MoroccanMalinois) checks
+
+    m_current_message += message;
+    if(m_current_message_id == m_total_messages){
+        emit multiDecoded(m_current_message);
+        reset();
+    }
+    else
+        emit requestNext(m_current_message_id+1, m_total_messages);
+}
+void QrCodeScanner::reset()
+{
+    m_current_message.clear();
+    m_current_message_id = 0;
+    m_total_messages = 0;
 }
 void QrCodeScanner::processFrame(QVideoFrame frame)
 {
@@ -96,6 +134,15 @@ void QrCodeScanner::setEnabled(bool enabled)
         m_processTimerId = this->startTimer(m_processInterval);
     }
     emit enabledChanged();
+}
+bool QrCodeScanner::multi() const
+{
+    return m_multi;
+}
+void QrCodeScanner::setMulti(bool m)
+{
+    m_multi = m;
+    emit multiChanged();
 }
 #ifdef WITH_SCANNER
 void QrCodeScanner::timerEvent(QTimerEvent *event)
