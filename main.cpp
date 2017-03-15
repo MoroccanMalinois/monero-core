@@ -52,8 +52,8 @@
 #include "wallet/wallet2_api.h"
 #include "MainApp.h"
 
-// IOS exclusions
-#ifndef Q_OS_IOS
+// Daemon exclusions
+#ifndef WITHOUT_DAEMON
 #include "daemon/DaemonManager.h"
 #endif
 
@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
 
     qmlRegisterUncreatableType<TransactionInfo>("moneroComponents.TransactionInfo", 1, 0, "TransactionInfo",
                                                         "TransactionHistory can't be instantiated directly");
-#ifndef Q_OS_IOS
+#ifndef WITHOUT_DAEMON
     qmlRegisterUncreatableType<DaemonManager>("moneroComponents.DaemonManager", 1, 0, "DaemonManager",
                                                    "DaemonManager can't be instantiated directly");
 #endif
@@ -149,8 +149,8 @@ int main(int argc, char *argv[])
 
     engine.rootContext()->setContextProperty("mainApp", &app);
 
-// Exclude daemon manager from IOS
-#ifndef Q_OS_IOS
+// Exclude daemon manager from mobiles
+#ifndef WITHOUT_DAEMON
     DaemonManager * daemonManager = DaemonManager::instance(&arguments);
     engine.rootContext()->setContextProperty("daemonManager", daemonManager);
 #endif

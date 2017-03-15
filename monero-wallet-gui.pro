@@ -65,7 +65,10 @@ SOURCES += main.cpp \
     src/QR-Code-scanner/QrCodeScanner.cpp \  
     MainApp.cpp
 
-!ios {
+
+ios|android {
+    DEFINES += WITHOUT_DAEMON
+} else {
     HEADERS += src/daemon/DaemonManager.h
     SOURCES += src/daemon/DaemonManager.cpp
 }
