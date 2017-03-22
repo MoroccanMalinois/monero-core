@@ -39,7 +39,6 @@
 #include "WalletManager.h"
 #include "Wallet.h"
 #include "QRCodeImageProvider.h"
-#include "QrCodeScanner.h"
 #include "PendingTransaction.h"
 #include "UnsignedTransaction.h"
 #include "TranslationManager.h"
@@ -67,8 +66,8 @@ int main(int argc, char *argv[])
 {
     // Enable high DPI scaling on windows & linux
 #if !defined(Q_OS_ANDROID) && QT_VERSION >= 0x050600
-    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    qDebug() << "High DPI auto scaling - enabled";
+//    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+//    qDebug() << "High DPI auto scaling - enabled";
 #endif
 
     // Log settings
@@ -130,8 +129,6 @@ int main(int argc, char *argv[])
     qRegisterMetaType<PendingTransaction::Priority>();
     qRegisterMetaType<TransactionInfo::Direction>();
     qRegisterMetaType<TransactionHistoryModel::TransactionInfoRole>();
-
-    qmlRegisterType<QrCodeScanner>("moneroComponents.QRCodeScanner", 1, 0, "QRCodeScanner");
 
     QQmlApplicationEngine engine;
 
@@ -200,16 +197,6 @@ int main(int argc, char *argv[])
     // Load main window (context properties needs to be defined obove this line)
     engine.load(QUrl(QStringLiteral("qrc:///main.qml")));
     QObject *rootObject = engine.rootObjects().first();
-
-    bool builtWithScanner = false;
-#ifdef WITH_SCANNER
-    builtWithScanner = true;
-    QObject *qmlCamera = rootObject->findChild<QObject*>("qrCameraQML");
-    QCamera *camera_ = qvariant_cast<QCamera*>(qmlCamera->property("mediaObject"));
-    QObject *qmlFinder = rootObject->findChild<QObject*>("QrFinder");
-    qobject_cast<QrCodeScanner*>(qmlFinder)->setSource(camera_);
-#endif
-    engine.rootContext()->setContextProperty("builtWithScanner", builtWithScanner);
 
     QObject::connect(eventFilter, SIGNAL(sequencePressed(QVariant,QVariant)), rootObject, SLOT(sequencePressed(QVariant,QVariant)));
     QObject::connect(eventFilter, SIGNAL(sequenceReleased(QVariant,QVariant)), rootObject, SLOT(sequenceReleased(QVariant,QVariant)));

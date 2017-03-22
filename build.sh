@@ -34,7 +34,7 @@ elif [ "$BUILD_TYPE" == "debug-android" ]; then
     BIN_PATH=debug/bin
 elif [ "$BUILD_TYPE" == "debug" ]; then
     echo "Building debug"
-	CONFIG="CONFIG+=debug"
+	CONFIG="CONFIG+=debug qml_debug"
     BIN_PATH=debug/bin
 else
     echo "Valid build types are release, release-static, release-android, debug-android and debug"
