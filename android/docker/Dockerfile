@@ -94,8 +94,8 @@ RUN cp ZBar/android/obj/local/armeabi-v7a/lib* ${ANDROID_NDK_ROOT}/platforms/${A
 
 ENV PATH $ANDROID_SDK_ROOT/tools:$ANDROID_SDK_ROOT/platform-tools:${WORKDIR}/Qt-${QT_VERSION}/bin:$CLEAN_PATH
 
-RUN git clone https://github.com/monero-project/monero-core.git \
-    && cd monero-core \
+RUN git clone https://github.com/monero-project/monero-gui.git \
+    && cd monero-gui \
     && git submodule update \
     && CC=arm-linux-androideabi-clang CXX=arm-linux-androideabi-clang++ BOOST_ROOT=/opt/android/boost_1_62_0 \
          BOOST_LIBRARYDIR=${WORKDIR}/boost_${BOOST_VERSION}/android32/lib/ \
